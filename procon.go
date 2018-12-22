@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-
 	"github.com/geistesk/procon/pc"
+
+	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 func main() {
@@ -20,11 +20,31 @@ func main() {
 	list.AddEntry(e3)
 	list.AddEntry(e4)
 
-	var buff = new(bytes.Buffer)
-	list.EncodeListToCbor(buff)
+	var app = tview.NewApplication()
+	var table = tview.NewTable().SetSeparator(tview.Borders.Vertical)
 
-	fmt.Printf("%X\n", buff)
+	table.SetCell(0, 0,
+		tview.NewTableCell("Pros").
+			SetAlign(tview.AlignCenter).
+			SetTextColor(tcell.ColorYellow))
+	table.SetCell(0, 1,
+		tview.NewTableCell("Cons").
+			SetAlign(tview.AlignCenter).
+			SetTextColor(tcell.ColorYellow))
 
-	var l2, _ = pc.DecodeListFromCbor(buff)
-	fmt.Println(l2)
+	pros, cons := list.ProsConsEntries()
+
+	for i := 0; i < len(pros); i++ {
+		table.SetCell(i+1, 0,
+			tview.NewTableCell(pros[i].Text).SetAlign(tview.AlignRight))
+	}
+
+	for i := 0; i < len(cons); i++ {
+		table.SetCell(i+1, 1,
+			tview.NewTableCell(cons[i].Text).SetAlign(tview.AlignLeft))
+	}
+
+	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
+		panic(err)
+	}
 }
