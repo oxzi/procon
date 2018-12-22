@@ -13,8 +13,8 @@ type List struct {
 }
 
 // NewList creates a new List with the given parameters.
-func NewList(name, filename string) List {
-	return List{
+func NewList(name, filename string) *List {
+	return &List{
 		Name:     name,
 		Filename: filename,
 	}

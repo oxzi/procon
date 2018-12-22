@@ -7,42 +7,40 @@ import (
 	"github.com/rivo/tview"
 )
 
-func main() {
-	var list = pc.NewList("Moving", "moving.pc")
+var (
+	dataList *pc.List
+	app      *tview.Application
+)
+
+func setupExampleList() {
+	dataList = pc.NewList("Moving", "moving.pc")
 
 	e1, _ := pc.NewEntry("Bigger flat", 6)
-	e2, _ := pc.NewEntry("Better Job", 4)
-	e3, _ := pc.NewEntry("No known people", -7)
-	e4, _ := pc.NewEntry("Irksome", -5)
+	e2, _ := pc.NewEntry("Whatever", 4)
+	e3, _ := pc.NewEntry("Better Job", 4)
+	e4, _ := pc.NewEntry("No known people", -10)
+	e5, _ := pc.NewEntry("Irksome", -5)
 
-	list.AddEntry(e1)
-	list.AddEntry(e2)
-	list.AddEntry(e3)
-	list.AddEntry(e4)
+	dataList.AddEntry(e1)
+	dataList.AddEntry(e2)
+	dataList.AddEntry(e3)
+	dataList.AddEntry(e4)
+	dataList.AddEntry(e5)
+}
 
-	var app = tview.NewApplication()
-	var table = tview.NewTable().SetSeparator(tview.Borders.Vertical)
+func main() {
+	app = tview.NewApplication()
 
-	table.SetCell(0, 0,
-		tview.NewTableCell("Pros").
-			SetAlign(tview.AlignCenter).
-			SetTextColor(tcell.ColorYellow))
-	table.SetCell(0, 1,
-		tview.NewTableCell("Cons").
-			SetAlign(tview.AlignCenter).
-			SetTextColor(tcell.ColorYellow))
+	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// TODO: make this optional
+		tableHandleKeyPress(event)
 
-	pros, cons := list.ProsConsEntries()
+		return event
+	})
 
-	for i := 0; i < len(pros); i++ {
-		table.SetCell(i+1, 0,
-			tview.NewTableCell(pros[i].Text).SetAlign(tview.AlignRight))
-	}
+	setupExampleList()
 
-	for i := 0; i < len(cons); i++ {
-		table.SetCell(i+1, 1,
-			tview.NewTableCell(cons[i].Text).SetAlign(tview.AlignLeft))
-	}
+	setupTable()
 
 	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
 		panic(err)
