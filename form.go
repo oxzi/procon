@@ -15,6 +15,7 @@ var (
 	formText  string
 	formType  string
 	formValue string
+	formEntry *pc.Entry
 )
 
 // formCreateValueText creates a value string from an int.
@@ -31,6 +32,14 @@ func formCreateValueText(value int) (valueText string) {
 
 // newEntryForm returns a new Form to create an entry.
 func newEntryForm(text string, value int) *tview.Form {
+	formText = text
+	formType = "Pro"
+	if value < 0 {
+		formType = "Contra"
+	}
+	formValue = formCreateValueText(value)
+	formEntry = nil
+
 	var typeDropDownInit = 0
 	if value < 0 {
 		typeDropDownInit = 1
@@ -68,7 +77,12 @@ func newEntryForm(text string, value int) *tview.Form {
 			panic(err)
 		}
 
-		dataList.AddEntry(entry)
+		if formEntry == nil {
+			dataList.AddEntry(entry)
+		} else {
+			formEntry.Text = formText
+			formEntry.Value = value
+		}
 
 		redrawTable()
 
@@ -86,6 +100,16 @@ func newEntryForm(text string, value int) *tview.Form {
 	})
 
 	form.SetBorder(true).SetTitle("New Entry").SetTitleAlign(tview.AlignLeft)
+
+	return form
+}
+
+// newEntryFormFromEntry creates a new form for editing an entry.
+func newEntryFormFromEntry(entry *pc.Entry) *tview.Form {
+	form := newEntryForm(entry.Text, entry.Value)
+	form.SetTitle(fmt.Sprintf("Edit %s", entry.Text))
+
+	formEntry = entry
 
 	return form
 }

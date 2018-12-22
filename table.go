@@ -79,25 +79,25 @@ func redrawTable() {
 	syncListToTable()
 }
 
-// removeTableEntry removes the current entry if one is selected.
-func removeTableEntry() {
+// selectedTableEntry returns an optional pointer to the currently selected
+// entry or nil otherwise.
+func selectedTableEntry() *pc.Entry {
 	var entry *pc.Entry
 
 	r, c := table.GetSelection()
 	if c == columnPros {
 		if r-1 >= len(tblPros) {
-			return
+			return nil
 		}
 		entry = tblPros[r-1]
 	} else {
 		if r-1 >= len(tblCons) {
-			return
+			return nil
 		}
 		entry = tblCons[r-1]
 	}
 
-	dataList.RemoveEntry(*entry)
-	redrawTable()
+	return entry
 }
 
 // tableHandleKeyPress is called when the table is in focus and a key was pressed.
@@ -108,7 +108,10 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 
 	switch event.Rune() {
 	case 'x':
-		removeTableEntry()
+		if entry := selectedTableEntry(); entry != nil {
+			dataList.RemoveEntry(*entry)
+			redrawTable()
+		}
 
 	case 'a':
 		_, pos := table.GetSelection()
@@ -126,7 +129,14 @@ func setupTable() {
 	table = tview.NewTable().
 		SetSeparator(tview.Borders.Vertical).
 		SetFixed(1, 1).
-		SetSelectable(true, true)
+		SetSelectable(true, true).
+		SetSelectedFunc(func(_, _ int) {
+			if entry := selectedTableEntry(); entry != nil {
+				isTable = false
+				pages.AddAndSwitchToPage(
+					pagesNameForm, newEntryFormFromEntry(entry), true)
+			}
+		})
 
 	table.SetBorder(true).SetTitleAlign(tview.AlignLeft)
 
