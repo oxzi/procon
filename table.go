@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	columnPros int = 0
-	columnCons int = 1
+	columnPros     int    = 0
+	columnCons     int    = 1
+	pagesNameTable string = "table"
 )
 
 var (
@@ -52,6 +53,8 @@ func syncListToTable() {
 	if dataList == nil {
 		return
 	}
+
+	table.SetTitle(dataList.Name)
 
 	tblPros, tblCons = dataList.ProsConsEntries()
 
@@ -106,6 +109,15 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 	switch event.Rune() {
 	case 'x':
 		removeTableEntry()
+
+	case 'a':
+		_, pos := table.GetSelection()
+		if pos == columnCons {
+			pos = -1
+		}
+
+		isTable = false
+		pages.AddAndSwitchToPage(pagesNameForm, newEntryForm("", pos), true)
 	}
 }
 
@@ -115,6 +127,8 @@ func setupTable() {
 		SetSeparator(tview.Borders.Vertical).
 		SetFixed(1, 1).
 		SetSelectable(true, true)
+
+	table.SetBorder(true).SetTitleAlign(tview.AlignLeft)
 
 	setupTableHeader()
 	syncListToTable()

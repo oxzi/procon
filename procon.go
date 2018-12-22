@@ -9,7 +9,10 @@ import (
 
 var (
 	dataList *pc.List
-	app      *tview.Application
+
+	app     *tview.Application
+	pages   *tview.Pages
+	isTable bool = true
 )
 
 func setupExampleList() {
@@ -29,20 +32,24 @@ func setupExampleList() {
 }
 
 func main() {
+	// XXX replace this with file handling
+	setupExampleList()
+
 	app = tview.NewApplication()
+	pages = tview.NewPages()
+
+	setupTable()
+	pages.AddAndSwitchToPage(pagesNameTable, table, true)
 
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// TODO: make this optional
-		tableHandleKeyPress(event)
+		if isTable {
+			tableHandleKeyPress(event)
+		}
 
 		return event
 	})
 
-	setupExampleList()
-
-	setupTable()
-
-	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
+	if err := app.SetRoot(pages, true).SetFocus(pages).Run(); err != nil {
 		panic(err)
 	}
 }
