@@ -1,4 +1,4 @@
-package proscons
+package pc
 
 import (
 	"reflect"
@@ -8,7 +8,7 @@ import (
 // List is a pros-cons list with a name, a filename and its entries.
 type List struct {
 	Name     string
-	Filename string
+	Filename string `codec:"-"`
 	Entries  []Entry
 }
 

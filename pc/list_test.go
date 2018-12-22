@@ -1,4 +1,4 @@
-package proscons
+package pc
 
 import "testing"
 

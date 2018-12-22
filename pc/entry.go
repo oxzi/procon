@@ -1,9 +1,11 @@
-package proscons
+package pc
 
 import (
 	"errors"
 	"fmt"
 )
+
+const valueAbsMax = 10
 
 // Entry is one entry in a pros-cons list. The Text field describes its purpose
 // and Value its characteristic on a scale from -10 to 10. Negative numbers are
@@ -15,8 +17,9 @@ type Entry struct {
 
 // NewEntry returns a new Entry. The value should be between -10 and 10.
 func NewEntry(text string, value int) (e Entry, err error) {
-	if value < -10 || value > 10 {
-		err = errors.New("Value should be between -10 and 10")
+	if value < -1*valueAbsMax || value > valueAbsMax {
+		err = errors.New(fmt.Sprintf(
+			"Value should be between -%d and %d", valueAbsMax, valueAbsMax))
 		return
 	}
 
