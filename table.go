@@ -109,8 +109,9 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 	switch event.Rune() {
 	case 'x':
 		if entry := selectedTableEntry(); entry != nil {
-			dataList.RemoveEntry(*entry)
-			redrawTable()
+			isTable = false
+			pages.AddAndSwitchToPage(
+				pagesNameDeleteForm, newDeleteEntryForm(entry), true)
 		}
 
 	case 'a':
@@ -120,15 +121,21 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 		}
 
 		isTable = false
-		pages.AddAndSwitchToPage(pagesNameForm, newEntryForm("", pos), true)
+		pages.AddAndSwitchToPage(pagesNameEntryForm, newEntryForm("", pos), true)
 
 	case 'w':
 		if err := saveDataList(); err != nil {
 			panic(err)
 		}
+		changed = false
 
 	case 'q':
-		app.Stop()
+		if changed {
+			isTable = false
+			pages.AddAndSwitchToPage(pagesNameQuitForm, newQuitEntryForm(), true)
+		} else {
+			app.Stop()
+		}
 	}
 }
 
@@ -142,7 +149,7 @@ func setupTable() {
 			if entry := selectedTableEntry(); entry != nil {
 				isTable = false
 				pages.AddAndSwitchToPage(
-					pagesNameForm, newEntryFormFromEntry(entry), true)
+					pagesNameEntryForm, newEntryFormFromEntry(entry), true)
 			}
 		})
 

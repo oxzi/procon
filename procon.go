@@ -13,9 +13,11 @@ import (
 var (
 	dataList *pc.List
 
-	app     *tview.Application
-	pages   *tview.Pages
+	app   *tview.Application
+	pages *tview.Pages
+
 	isTable bool = true
+	changed bool = false
 )
 
 // openFile opens or creates a List based on the first parameter.
