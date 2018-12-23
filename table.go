@@ -71,20 +71,32 @@ func entryRepresentation(entry *pc.Entry) string {
 
 // setupTableHeader creats the table's header.
 func setupTableHeader() {
+	var proPoints, conPoints string
+
+	if p, c := dataList.SumValues(); p == c {
+		proPoints = fmt.Sprintf("[yellow::bu]Pros %d", p)
+		conPoints = fmt.Sprintf("[yellow::bu]%d Cons", c)
+	} else if p > c {
+		proPoints = fmt.Sprintf("[yellow::bu]Pros %d", p)
+		conPoints = fmt.Sprintf("[yellow]%d Cons", c)
+	} else {
+		proPoints = fmt.Sprintf("[yellow]Pros %d", p)
+		conPoints = fmt.Sprintf("[yellow::bu]%d Cons", c)
+	}
+
 	cols := []struct {
 		no   int
 		text string
 	}{
-		{columnPros, "Pros"},
-		{columnCons, "Cons"},
+		{columnPros, proPoints},
+		{columnCons, conPoints},
 	}
 
 	for _, col := range cols {
 		table.SetCell(0, col.no,
 			tview.NewTableCell(col.text).
 				SetSelectable(false).
-				SetAlign(tview.AlignCenter).
-				SetTextColor(tcell.ColorYellow))
+				SetAlign(tview.AlignCenter))
 	}
 }
 
