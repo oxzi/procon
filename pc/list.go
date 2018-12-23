@@ -7,15 +7,13 @@ import (
 
 // List is a pros-cons list with a name, a filename and its entries.
 type List struct {
-	Name     string
 	Filename string `codec:"-"`
 	Entries  []Entry
 }
 
 // NewList creates a new List with the given parameters.
-func NewList(name, filename string) *List {
+func NewList(filename string) *List {
 	return &List{
-		Name:     name,
 		Filename: filename,
 	}
 }

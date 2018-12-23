@@ -10,15 +10,55 @@ import (
 )
 
 const (
-	columnPros     int    = 0
-	columnCons     int    = 1
-	pagesNameTable string = "table"
+	columnPros int = 0
+	columnCons int = 1
+
+	pagesNameTable       string = "table"
+	pagesNameDeleteModal string = "deletemodal"
+	pagesNameQuitModal   string = "quitmodal"
 )
 
 var (
 	table            *tview.Table
 	tblPros, tblCons []*pc.Entry
 )
+
+// newDeleteEntryModal asks the user if the given entry should be deleted.
+func newDeleteEntryModal(entry *pc.Entry) *tview.Modal {
+	return tview.NewModal().
+		SetText(fmt.Sprintf("Do you want to delete\n\"%s\"?", entry.Text)).
+		AddButtons([]string{"Delete", "Cancel"}).
+		SetDoneFunc(func(_ int, buttonLabel string) {
+			if buttonLabel == "Delete" {
+				dataList.RemoveEntry(*entry)
+				redrawTable()
+
+				changed = true
+			}
+
+			pages.SwitchToPage(pagesNameTable)
+			pages.RemovePage(pagesNameDeleteModal)
+
+			isTable = true
+		})
+}
+
+// newQuitEntryModal is opened when the state is changed and asks the user to
+// save or discard the changes.
+func newQuitEntryModal() *tview.Modal {
+	return tview.NewModal().
+		SetText("You have unsaved changes.").
+		AddButtons([]string{"Save", "Discard"}).
+		SetDoneFunc(func(_ int, buttonLabel string) {
+			if buttonLabel == "Save" {
+				if err := saveDataList(); err != nil {
+					panic(err)
+				}
+			}
+
+			app.Stop()
+		})
+}
 
 // entryRepresentation returns a representing string for the table.
 func entryRepresentation(entry *pc.Entry) string {
@@ -54,7 +94,7 @@ func syncListToTable() {
 		return
 	}
 
-	table.SetTitle(dataList.Name)
+	table.SetTitle(dataList.Filename)
 
 	tblPros, tblCons = dataList.ProsConsEntries()
 
@@ -111,7 +151,7 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 		if entry := selectedTableEntry(); entry != nil {
 			isTable = false
 			pages.AddAndSwitchToPage(
-				pagesNameDeleteForm, newDeleteEntryForm(entry), true)
+				pagesNameDeleteModal, newDeleteEntryModal(entry), true)
 		}
 
 	case 'a':
@@ -132,7 +172,7 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 	case 'q':
 		if changed {
 			isTable = false
-			pages.AddAndSwitchToPage(pagesNameQuitForm, newQuitEntryForm(), true)
+			pages.AddAndSwitchToPage(pagesNameQuitModal, newQuitEntryModal(), true)
 		} else {
 			app.Stop()
 		}
