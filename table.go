@@ -16,12 +16,28 @@ const (
 	pagesNameTable       string = "table"
 	pagesNameDeleteModal string = "deletemodal"
 	pagesNameQuitModal   string = "quitmodal"
+	pagesNamePanicModal  string = "panicmodal"
 )
 
 var (
 	table            *tview.Table
 	tblPros, tblCons []*pc.Entry
 )
+
+// newPanicModal shows an error in a new modal and returns to the given page.
+func newPanicModal(err error, returnToPage string) *tview.Modal {
+	return tview.NewModal().
+		SetText(fmt.Sprintf("An error occured:\n%v", err)).
+		AddButtons([]string{"OK"}).
+		SetDoneFunc(func(_ int, _ string) {
+			pages.SwitchToPage(returnToPage)
+			pages.RemovePage(pagesNamePanicModal)
+
+			if returnToPage == pagesNameTable {
+				isTable = true
+			}
+		})
+}
 
 // newDeleteEntryModal asks the user if the given entry should be deleted.
 func newDeleteEntryModal(entry *pc.Entry) *tview.Modal {
@@ -48,15 +64,25 @@ func newDeleteEntryModal(entry *pc.Entry) *tview.Modal {
 func newQuitEntryModal() *tview.Modal {
 	return tview.NewModal().
 		SetText("You have unsaved changes.").
-		AddButtons([]string{"Save", "Discard"}).
+		AddButtons([]string{"Save", "Discard", "Cancel"}).
 		SetDoneFunc(func(_ int, buttonLabel string) {
 			if buttonLabel == "Save" {
 				if err := saveDataList(); err != nil {
-					panic(err)
+					pages.AddAndSwitchToPage(
+						pagesNamePanicModal, newPanicModal(err, pagesNameQuitModal), true)
+
+					return
 				}
 			}
 
-			app.Stop()
+			if buttonLabel == "Cancel" {
+				pages.SwitchToPage(pagesNameTable)
+				pages.RemovePage(pagesNameQuitModal)
+
+				isTable = true
+			} else {
+				app.Stop()
+			}
 		})
 }
 
@@ -177,9 +203,11 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 
 	case 'w':
 		if err := saveDataList(); err != nil {
-			panic(err)
+			pages.AddAndSwitchToPage(
+				pagesNamePanicModal, newPanicModal(err, pagesNameTable), true)
+		} else {
+			changed = false
 		}
-		changed = false
 
 	case 'q':
 		if changed {

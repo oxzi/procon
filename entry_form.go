@@ -72,10 +72,7 @@ func newEntryForm(text string, value int) *tview.Form {
 			value *= -1
 		}
 
-		entry, err := pc.NewEntry(entryFormText, value)
-		if err != nil {
-			panic(err)
-		}
+		entry, _ := pc.NewEntry(entryFormText, value)
 
 		if entryFormEntry == nil {
 			dataList.AddEntry(entry)
