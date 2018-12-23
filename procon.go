@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/geistesk/procon/pc"
 
 	"github.com/gdamore/tcell"
@@ -15,25 +17,17 @@ var (
 	isTable bool = true
 )
 
-func setupExampleList() {
-	dataList = pc.NewList("Moving", "moving.pc")
-
-	e1, _ := pc.NewEntry("Bigger flat", 6)
-	e2, _ := pc.NewEntry("Whatever", 4)
-	e3, _ := pc.NewEntry("Better Job", 4)
-	e4, _ := pc.NewEntry("No known people", -10)
-	e5, _ := pc.NewEntry("Irksome", -5)
-
-	dataList.AddEntry(e1)
-	dataList.AddEntry(e2)
-	dataList.AddEntry(e3)
-	dataList.AddEntry(e4)
-	dataList.AddEntry(e5)
-}
-
 func main() {
-	// XXX replace this with file handling
-	setupExampleList()
+	if args := os.Args[1:]; len(args) == 1 {
+		if err := loadDataList(args[0]); os.IsNotExist(err) {
+			dataList = new(pc.List)
+			dataList.Filename = args[0]
+		} else if err != nil {
+			panic(err)
+		}
+	} else {
+		panic("One parameter hurr durr")
+	}
 
 	app = tview.NewApplication()
 	pages = tview.NewPages()
@@ -45,11 +39,10 @@ func main() {
 		if isTable {
 			tableHandleKeyPress(event)
 		}
-
 		return event
 	})
 
-	if err := app.SetRoot(pages, true).SetFocus(pages).Run(); err != nil {
+	if err := app.SetRoot(pages, true).Run(); err != nil {
 		panic(err)
 	}
 }

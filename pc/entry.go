@@ -11,6 +11,8 @@ const valueAbsMax = 10
 // and Value its characteristic on a scale from -10 to 10. Negative numbers are
 // representing a "contra", positive numbers a "pro".
 type Entry struct {
+	_struct bool `codec:",toarray"`
+
 	Text  string
 	Value int
 }

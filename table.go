@@ -121,6 +121,11 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 
 		isTable = false
 		pages.AddAndSwitchToPage(pagesNameForm, newEntryForm("", pos), true)
+
+	case 'w':
+		if err := saveDataList(); err != nil {
+			panic(err)
+		}
 	}
 }
 
