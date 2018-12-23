@@ -126,6 +126,9 @@ func tableHandleKeyPress(event *tcell.EventKey) {
 		if err := saveDataList(); err != nil {
 			panic(err)
 		}
+
+	case 'q':
+		app.Stop()
 	}
 }
 

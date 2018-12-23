@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/geistesk/procon/pc"
@@ -17,17 +18,25 @@ var (
 	isTable bool = true
 )
 
-func main() {
+// openFile opens or creates a List based on the first parameter.
+func openFile() {
 	if args := os.Args[1:]; len(args) == 1 {
 		if err := loadDataList(args[0]); os.IsNotExist(err) {
 			dataList = new(pc.List)
 			dataList.Filename = args[0]
 		} else if err != nil {
-			panic(err)
+			fmt.Printf("procon, failed to open list: %v\n\n", err)
+			os.Exit(1)
 		}
 	} else {
-		panic("One parameter hurr durr")
+		fmt.Println("Usage: procon filename")
+		fmt.Println("  filename will be opened or created\n")
+		os.Exit(1)
 	}
+}
+
+func main() {
+	openFile()
 
 	app = tview.NewApplication()
 	pages = tview.NewPages()
@@ -36,13 +45,19 @@ func main() {
 	pages.AddAndSwitchToPage(pagesNameTable, table, true)
 
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyCtrlC {
+			return nil
+		}
+
 		if isTable {
 			tableHandleKeyPress(event)
 		}
+
 		return event
 	})
 
 	if err := app.SetRoot(pages, true).Run(); err != nil {
-		panic(err)
+		fmt.Printf("procon, failed to launch UI: %v\n\n", err)
+		os.Exit(1)
 	}
 }
