@@ -4,6 +4,21 @@ Terminal UI based Pros and Cons List.
 [![asciicast](https://asciinema.org/a/jJ3T3oiOdp9VSZxPCeGnxZAhH.svg)](https://asciinema.org/a/jJ3T3oiOdp9VSZxPCeGnxZAhH)
 
 
+## Install
+### NixOS
+
+```bash
+git clone https://github.com/geistesk/procon.git
+cd procon
+nix-env -f . -i procon
+```
+
+### Generic
+
+This application is based on Go Modules. Therefore one should have Go installed
+and is able to clone and `go build` this project.
+
+
 ## Usage
 
 Launch `procon` with an existing *Pros and Cons List* as parameter or a new
